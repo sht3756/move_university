@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:move_university_project/features/user_details/cubit/user_details_cubit.dart';
 import 'package:move_university_project/features/user_details/data/models/user_details_model.dart';
+import 'package:move_university_project/features/user_insert/cubit/user_insert_cubit.dart';
+import 'package:move_university_project/features/user_insert/cubit/user_insert_state.dart';
+import 'package:move_university_project/features/user_insert/presentation/user_insert_screen.dart';
 import 'package:move_university_project/features/user_list/cubit/user_list_cubit.dart';
 import 'package:move_university_project/features/user_list/data/models/user_model.dart';
+import 'package:move_university_project/shared/widgets/empty_widget.dart';
 import '../cubit/user_list_state.dart';
 
 class UserListScreen extends StatefulWidget {
@@ -16,17 +19,7 @@ class UserListScreen extends StatefulWidget {
 class _UserListScreenState extends State<UserListScreen> {
   double _swipeOffset = 0.0;
   final double _maxSwipeOffset = 30.0;
-  final nameTextController = TextEditingController();
-  final phoneTextController = TextEditingController();
-  final emailTextController = TextEditingController();
 
-  @override
-  void dispose() {
-    nameTextController.dispose();
-    phoneTextController.dispose();
-    emailTextController.dispose();
-    super.dispose();
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,31 +28,52 @@ class _UserListScreenState extends State<UserListScreen> {
         actions: [
           IconButton(
               onPressed: () {
-                openUserBottomModal();
+                showModalBottomSheet<void>(
+                  isScrollControlled: true,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const UserInsertScreen();
+                  },
+                );
               },
               icon: const Icon(Icons.add))
         ],
       ),
-      body: BlocConsumer<UserListCubit, UserListState>(
-        listener: (context, state) {
-          state.whenOrNull(error: (e, s) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: $e')),
-            );
-          });
-        },
-        builder: (context, state) {
-          return state.when(
-              initial: () => const Center(child: Text('init')),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              success: (
-                List<UserModel> users,
-                String? lastDocumentId,
-                bool hasMore,
-              ) =>
-                  userListFragment(users, lastDocumentId, hasMore),
-              error: (e, s) => Center(child: Text('Error: $e')));
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<UserInsertCubit, UserInsertState>(
+              listener: (BuildContext context, state) {
+            state.whenOrNull(success: (UserDetailsModel details) {
+              context.read<UserListCubit>().fetchUsers();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('등록 성공하였습니다.')),
+              );
+            });
+          }),
+        ],
+        child: BlocConsumer<UserListCubit, UserListState>(
+          listener: (context, state) {
+            state.whenOrNull(error: (e, s) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: $e')),
+              );
+            });
+          },
+          builder: (context, state) {
+            return state.when(
+                initial: () => const Center(child: Text('init')),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                success: (
+                  List<UserModel> users,
+                  String? lastDocumentId,
+                  bool hasMore,
+                ) =>
+                    users.isEmpty
+                        ? emptyWidget()
+                        : userListFragment(users, lastDocumentId, hasMore),
+                error: (e, s) => Center(child: Text('Error: $e')));
+          },
+        ),
       ),
     );
   }
@@ -77,7 +91,6 @@ class _UserListScreenState extends State<UserListScreen> {
         child: ListView.builder(
           itemCount: users.length,
           itemBuilder: (context, index) {
-            // if(더보기 실행시 ) => 더보기 함수 ;
             final user = users[index];
             return GestureDetector(
               onHorizontalDragUpdate: (details) {
@@ -116,9 +129,13 @@ class _UserListScreenState extends State<UserListScreen> {
                       ),
                       title: Text(user.name),
                       subtitle: Text(user.phone),
-                      onTap: () {
-                        Navigator.pushNamed(context, '/userDetails',
+                      onTap: () async {
+                        final result = await Navigator.pushNamed(
+                            context, '/userDetails',
                             arguments: user);
+                        if (result == true) {
+                          context.read<UserListCubit>().fetchUsers();
+                        }
                       },
                       contentPadding: _swipeOffset >= _maxSwipeOffset * 0.5
                           ? const EdgeInsets.only(right: 0)
@@ -179,87 +196,5 @@ class _UserListScreenState extends State<UserListScreen> {
           },
         ) ??
         false;
-  }
-
-  Future<void> openUserBottomModal() async {
-    return showModalBottomSheet<void>(
-      isScrollControlled: true,
-      context: context,
-      builder: (BuildContext context) {
-        return ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height - kToolbarHeight,
-            child: Scaffold(
-              appBar: AppBar(
-                elevation: 1,
-                backgroundColor: Colors.grey[200],
-                title: const Text('사용자 추가'),
-                leading: TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('취소'),
-                ),
-                actions: [
-                  TextButton(
-                      onPressed: () {
-                        context.read<UserDetailsCubit>().insertUserDetails(
-                              UserDetailsModel(
-                                name: nameTextController.value.text,
-                                email: emailTextController.value.text,
-                                phone: phoneTextController.value.text,
-                                registerDate: DateTime.now(),
-                                modifiedDate: DateTime.now(),
-                              ),
-                            );
-                      },
-                      child: const Text('완료')),
-                ],
-              ),
-              body: Container(
-                // color: Colors.grey[200],
-                padding: const EdgeInsets.all(10),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: nameTextController,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.person_sharp),
-                          label: Text('사용자 이름'),
-                        ),
-                      ),
-                      TextField(
-                        controller: emailTextController,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.email),
-                          hintText: 'example@google.com',
-                          label: Text('이메일'),
-                        ),
-                      ),
-                      TextField(
-                        controller: phoneTextController,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.phone),
-                          hintText: '010-0000-0000',
-                          label: Text('핸드폰 번호'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 }
