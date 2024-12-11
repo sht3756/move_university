@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:move_university_project/core/utils/stack_trace_converter.dart';
 import 'package:move_university_project/features/user_list/data/models/user_model.dart';
+
+import '../../../core/utils/document_snapshot_converter.dart';
 
 part 'user_list_state.freezed.dart';
 
@@ -12,8 +15,7 @@ class UserListState with _$UserListState {
   const factory UserListState.loading() = _Loading;
   const factory UserListState.success({
     required List<UserModel> users,
-    String? lastDocumentId,
-    required bool hasMore,
+    @DocumentSnapshotConverter() DocumentSnapshot? lastDocument,
 }) = _Success;
   const factory UserListState.error({
       required Object e,
