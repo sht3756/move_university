@@ -17,9 +17,6 @@ class UserListScreen extends StatefulWidget {
 }
 
 class _UserListScreenState extends State<UserListScreen> {
-  double _swipeOffset = 0.0;
-  final double _maxSwipeOffset = 30.0;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,96 +77,40 @@ class _UserListScreenState extends State<UserListScreen> {
 
   Widget userListFragment(
       List<UserModel> users, String? lastDocumentId, bool hasMore) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _swipeOffset = 0.0;
-        });
-      },
-      child: Container(
-        color: Colors.grey[300],
-        child: ListView.builder(
-          itemCount: users.length,
-          itemBuilder: (context, index) {
-            final user = users[index];
-            return GestureDetector(
-              onHorizontalDragUpdate: (details) {
-                setState(() {
-                  if (details.delta.dx < 0) {
-                    _swipeOffset = (_swipeOffset - details.delta.dx)
-                        .clamp(0.0, _maxSwipeOffset);
-                  } else if (details.delta.dx > 0) {
-                    _swipeOffset = 0.0;
-                  }
-                });
-              },
-              onHorizontalDragEnd: (_) {
-                if (_swipeOffset < _maxSwipeOffset * 0.5) {
-                  setState(() {
-                    _swipeOffset = 0.0;
-                  });
-                }
-              },
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Container(
-                      color: Colors.white,
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 20),
-                    ),
-                  ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    transform:
-                        Matrix4.translationValues(-_swipeOffset, 0.0, 0.0),
-                    child: ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(Icons.person),
-                      ),
-                      title: Text(user.name),
-                      subtitle: Text(user.phone),
-                      onTap: () async {
-                        final result = await Navigator.pushNamed(
-                            context, '/userDetails',
-                            arguments: user);
-                        if (result == true) {
-                          context.read<UserListCubit>().fetchUsers();
-                        }
-                      },
-                      contentPadding: _swipeOffset >= _maxSwipeOffset * 0.5
-                          ? const EdgeInsets.only(right: 0)
-                          : null,
-                      trailing: _swipeOffset >= _maxSwipeOffset * 0.5
-                          ? ElevatedButton(
-                              onPressed: () async {
-                                final confirm =
-                                    await showDeleteConfirmationDialog(
-                                        context, user.name);
-                                if (confirm) {
-                                  setState(() {
-                                    users.removeAt(index);
-                                    _swipeOffset = 0.0;
-                                  });
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                              ),
-                              child: const Text(
-                                '삭제',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.arrow_forward_ios_rounded,
-                              size: 12),
-                    ),
-                  ),
-                ],
+    return Container(
+      color: Colors.grey[300],
+      child: ListView.builder(
+        itemCount: users.length,
+        itemBuilder: (context, index) {
+          final user = users[index];
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: Container(
+                  color: Colors.white,
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                ),
               ),
-            );
-          },
-        ),
+              ListTile(
+                leading: const CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
+                title: Text(user.name),
+                subtitle: Text(user.phone),
+                onTap: () async {
+                  final result = await Navigator.pushNamed(
+                      context, '/userDetails',
+                      arguments: user);
+                  if (result == true) {
+                    context.read<UserListCubit>().fetchUsers();
+                  }
+                },
+                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 12),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
