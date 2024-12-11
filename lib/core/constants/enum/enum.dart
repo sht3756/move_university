@@ -1,0 +1,1 @@
+enum UserCardMode { view, edit, create }
