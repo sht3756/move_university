@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "118580313996",
+    "project_id": "move-univ",
+    "storage_bucket": "move-univ.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:118580313996:android:1a9f68a22d8236c877a0a9",
+        "android_client_info": {
+          "package_name": "com.sht3756.move_university_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlaLZ3OnYCNxRsrc9jAEnohMEf5OtCCCc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
