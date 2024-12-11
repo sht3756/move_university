@@ -34,11 +34,11 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
   }
 
   // 유저 정보 삭제하기
-  Future<void> deleteUserDetails(String userName) async {
+  Future<void> deleteUserDetails(String userEmail) async {
     emit(const UserDetailsState.loading());
 
     try {
-      await _repository.deleteUserDetails(userName);
+      await _repository.deleteUserDetails(userEmail);
       emit(const UserDetailsState.initial());
     } catch (e, s) {
       emit(UserDetailsState.error(e: e, s: s));

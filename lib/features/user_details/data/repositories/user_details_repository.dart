@@ -31,9 +31,9 @@ class UserDetailsRepository {
   }
 
   // 유저 정보 삭제하기
-  Future<void> deleteUserDetails(String userName) async {
+  Future<void> deleteUserDetails(String userEmail) async {
     try {
-      await _firestore.collection('user').doc(userName).delete();
+      await _firestore.collection('user').doc(userEmail).delete();
     } catch(e, s){
       throw Exception('deleteUserDetails-error : $e, $s');
     }
