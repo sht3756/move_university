@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_university_project/features/user_details/data/models/user_details_model.dart';
@@ -24,16 +25,17 @@ class _UserListScreenState extends State<UserListScreen> {
         title: const Text('회원 리스트'),
         actions: [
           IconButton(
-              onPressed: () {
-                showModalBottomSheet<void>(
-                  isScrollControlled: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return const UserInsertScreen();
-                  },
-                );
-              },
-              icon: const Icon(Icons.add))
+            onPressed: () {
+              showModalBottomSheet<void>(
+                isScrollControlled: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return const UserInsertScreen();
+                },
+              );
+            },
+            icon: const Icon(Icons.add),
+          )
         ],
       ),
       body: MultiBlocListener(
@@ -62,12 +64,11 @@ class _UserListScreenState extends State<UserListScreen> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 success: (
                   List<UserModel> users,
-                  String? lastDocumentId,
-                  bool hasMore,
+                  DocumentSnapshot? lastDocument,
                 ) =>
                     users.isEmpty
                         ? emptyWidget()
-                        : userListFragment(users, lastDocumentId, hasMore),
+                        : userListFragment(users, lastDocument),
                 error: (e, s) => Center(child: Text('Error: $e')));
           },
         ),
@@ -76,39 +77,35 @@ class _UserListScreenState extends State<UserListScreen> {
   }
 
   Widget userListFragment(
-      List<UserModel> users, String? lastDocumentId, bool hasMore) {
-    return Container(
-      color: Colors.grey[300],
+      List<UserModel> users, DocumentSnapshot? lastDocumentId) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollEndNotification &&
+            notification.metrics.pixels ==
+                notification.metrics.maxScrollExtent) {
+          context.read<UserListCubit>().fetchUsersMore();
+          return true;
+        }
+        return false;
+      },
       child: ListView.builder(
         itemCount: users.length,
         itemBuilder: (context, index) {
           final user = users[index];
-          return Stack(
-            children: [
-              Positioned.fill(
-                child: Container(
-                  color: Colors.white,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                ),
-              ),
-              ListTile(
-                leading: const CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
-                title: Text(user.name),
-                subtitle: Text(user.phone),
-                onTap: () async {
-                  final result = await Navigator.pushNamed(
-                      context, '/userDetails',
-                      arguments: user);
-                  if (result == true) {
-                    context.read<UserListCubit>().fetchUsers();
-                  }
-                },
-                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 12),
-              ),
-            ],
+          return ListTile(
+            leading: const CircleAvatar(
+              child: Icon(Icons.person),
+            ),
+            title: Text(user.name),
+            subtitle: Text(user.phone),
+            onTap: () async {
+              final result = await Navigator.pushNamed(context, '/userDetails',
+                  arguments: user);
+              if (result == true) {
+                context.read<UserListCubit>().fetchUsers();
+              }
+            },
+            trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 12),
           );
         },
       ),
