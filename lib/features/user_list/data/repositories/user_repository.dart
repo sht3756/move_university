@@ -7,7 +7,7 @@ class UserRepository {
   UserRepository(this._firestore);
 
   Future<List<UserModel>> fetchUsers({required int limit, String? lastDocumentId}) async {
-    Query query = _firestore.collection('user').limit(limit);
+    Query query = _firestore.collection('user').orderBy('registerDate', descending: true).limit(limit);
 
     if (lastDocumentId != null) {
       query = query.startAfter([lastDocumentId]);
