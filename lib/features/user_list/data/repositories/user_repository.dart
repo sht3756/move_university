@@ -6,14 +6,23 @@ class UserRepository {
 
   UserRepository(this._firestore);
 
-  Future<List<UserModel>> fetchUsers({required int limit, String? lastDocumentId}) async {
-    Query query = _firestore.collection('user').orderBy('registerDate', descending: true).limit(limit);
+  Future<Map<String, dynamic>> fetchUsers(
+      {required int limit, DocumentSnapshot? lastDocumentId}) async {
+    Query query = _firestore
+        .collection('user')
+        .orderBy('registerDate', descending: true)
+        .limit(limit);
 
     if (lastDocumentId != null) {
-      query = query.startAfter([lastDocumentId]);
+      query = query.startAfterDocument(lastDocumentId);
     }
 
     final snapshot = await query.get();
-    return snapshot.docs.map((doc) => UserModel.fromJson(doc.data() as Map<String, dynamic> )).toList();
+    return {
+      'users': snapshot.docs
+          .map((doc) => UserModel.fromJson(doc.data() as Map<String, dynamic>))
+          .toList(),
+      'lastDocument': snapshot.docs.isEmpty ? null : snapshot.docs.last,
+    };
   }
 }
