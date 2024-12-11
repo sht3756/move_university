@@ -44,16 +44,4 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
       emit(UserDetailsState.error(e: e, s: s));
     }
   }
-
-  // 등록하기
-  Future<void> insertUserDetails(UserDetailsModel userDetail) async {
-    emit(const UserDetailsState.loading());
-
-    try {
-      await _repository.insertUserDetails(userDetail);
-      emit(UserDetailsState.success(userDetail: userDetail));
-    } catch(e, s) {
-      emit(UserDetailsState.error(e: e, s: s));
-    }
-  }
 }

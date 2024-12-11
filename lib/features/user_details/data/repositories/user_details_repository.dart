@@ -24,7 +24,7 @@ class UserDetailsRepository {
   // 유저 정보 수정하기
   Future<void> updateUserDetails(UserDetailsModel userDetails) async {
     try {
-      await _firestore.collection('user').doc(userDetails.name).update(userDetails.toJson());
+      await _firestore.collection('user').doc(userDetails.email).update(userDetails.toJson());
     } catch(e, s) {
       throw Exception('updateUserDetails-error : $e, $s');
     }
@@ -38,15 +38,4 @@ class UserDetailsRepository {
       throw Exception('deleteUserDetails-error : $e, $s');
     }
   }
-
-  // 유저 정보 등록
- Future<void> insertUserDetails(UserDetailsModel userDetail) async {
-    try {
-      // await _firestore.collection('user').doc(userDetail.userModel.email).set(userDetail.toJson());
-      await _firestore.collection('user').doc('abc').set({'name' : 'dd'});
-
-    } catch(e, s) {
-      throw Exception('insertUserDetails-error : $e, $s');
-    }
- }
 }
