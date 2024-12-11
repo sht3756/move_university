@@ -114,28 +114,4 @@ class _UserListScreenState extends State<UserListScreen> {
       ),
     );
   }
-
-  Future<bool> showDeleteConfirmationDialog(
-      BuildContext context, String item) async {
-    return await showDialog(
-          context: context,
-          builder: (ctx) {
-            return AlertDialog(
-              title: const Text('삭제 확인'),
-              content: Text('$item을(를) 삭제하시겠습니까?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(false),
-                  child: const Text('취소'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(true),
-                  child: const Text('삭제'),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
-  }
 }
