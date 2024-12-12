@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:move_university_project/features/user_details/cubit/user_details_cubit.dart';
 import 'package:move_university_project/features/user_details/data/models/user_details_model.dart';
 import 'package:move_university_project/features/user_insert/cubit/user_insert_cubit.dart';
 import 'package:move_university_project/features/user_insert/cubit/user_insert_state.dart';
@@ -18,24 +19,63 @@ class UserListScreen extends StatefulWidget {
 }
 
 class _UserListScreenState extends State<UserListScreen> {
+  bool isEditing = false;
+  final Set<UserModel> selectedUsers = {};
+
+  void toggleEditMode() {
+    setState(() {
+      isEditing = !isEditing;
+      selectedUsers.clear();
+    });
+  }
+
+  void deleteSelectedUsers() {
+    if (selectedUsers.isEmpty) return;
+
+    for (var user in selectedUsers) {
+      context.read<UserDetailsCubit>().deleteUserDetails(user.email);
+    }
+
+    context.read<UserListCubit>().fetchUsers();
+    toggleEditMode();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('회원 리스트'),
+        centerTitle: true,
+        leading: isEditing
+            ? IconButton(
+                onPressed: deleteSelectedUsers,
+                icon: const Icon(Icons.delete),
+              )
+            : null,
         actions: [
-          IconButton(
-            onPressed: () {
-              showModalBottomSheet<void>(
-                isScrollControlled: true,
-                context: context,
-                builder: (BuildContext context) {
-                  return const UserInsertScreen();
-                },
-              );
-            },
-            icon: const Icon(Icons.add),
-          )
+          if (isEditing) ...[
+            IconButton(
+              icon: const Icon(Icons.cancel),
+              onPressed: toggleEditMode,
+            )
+          ] else ...[
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: toggleEditMode,
+            ),
+            IconButton(
+              onPressed: () {
+                showModalBottomSheet<void>(
+                  isScrollControlled: true,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const UserInsertScreen();
+                  },
+                );
+              },
+              icon: const Icon(Icons.add),
+            )
+          ]
         ],
       ),
       body: MultiBlocListener(
@@ -93,19 +133,33 @@ class _UserListScreenState extends State<UserListScreen> {
         itemBuilder: (context, index) {
           final user = users[index];
           return ListTile(
-            leading: const CircleAvatar(
-              child: Icon(Icons.person),
-            ),
+            leading: isEditing
+                ? Checkbox(
+                    value: selectedUsers.contains(user),
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          selectedUsers.add(user);
+                        } else {
+                          selectedUsers.remove(user);
+                        }
+                      });
+                    })
+                : const CircleAvatar(
+                    child: Icon(Icons.person),
+                  ),
             title: Text(user.name),
             subtitle: Text(user.phone),
-            onTap: () async {
+            onTap: isEditing ? null : () async {
               final result = await Navigator.pushNamed(context, '/userDetails',
                   arguments: user);
               if (result == true) {
                 context.read<UserListCubit>().fetchUsers();
               }
             },
-            trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 12),
+            trailing: isEditing
+                ? null
+                : const Icon(Icons.arrow_forward_ios_rounded, size: 12),
           );
         },
       ),
