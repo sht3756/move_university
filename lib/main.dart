@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:move_university_project/features/user_details/cubit/user_details_cubit.dart';
+import 'package:move_university_project/features/user_details/data/repositories/user_details_repository.dart';
 import 'package:move_university_project/features/user_insert/cubit/user_insert_cubit.dart';
 import 'package:move_university_project/features/user_insert/data/repositories/user_insert_repository.dart';
 import 'package:move_university_project/features/user_insert/presentation/user_insert_screen.dart';
@@ -27,18 +29,26 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        MultiBlocProvider(providers: [
-          BlocProvider(
-            create: (_) => UserListCubit(
-              UserRepository(FirebaseFirestore.instance),
-            )..fetchUsers(),
-          ),
-          BlocProvider(
-            create: (_) => UserInsertCubit(
-              UserInsertRepository(FirebaseFirestore.instance),
+        MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => UserListCubit(
+                UserRepository(FirebaseFirestore.instance),
+              )..fetchUsers(),
             ),
-          ),
-        ], child: const UserListScreen()),
+            BlocProvider(
+              create: (_) => UserInsertCubit(
+                UserInsertRepository(FirebaseFirestore.instance),
+              ),
+            ),
+            BlocProvider(
+              create: (_) => UserDetailsCubit(
+                UserDetailsRepository(FirebaseFirestore.instance),
+              ),
+            ),
+          ],
+          child: const UserListScreen(),
+        ),
         BlocProvider(
           create: (_) => UserInsertCubit(
             UserInsertRepository(FirebaseFirestore.instance),
