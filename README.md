@@ -1,11 +1,11 @@
 # 이사대학 [신희태] 과제
 
 ## 주요 기능 설명 
-- 사용자 목록 조회 
-- 사용자 상세보기, 수정 및 삭제 
-- 사용자 추가 및 삭제 : 
+- 사용자 목록 조회 : NotificationListener 를 통해 무한 스크롤 기능 연동
+- 사용자 상세보기, 수정 및 삭제 : 작성 모드를 통해 수정 모드 및 삭제 기능 연동
+- 사용자 추가 : 바텀 모달 시트를 통해 사용자 추가 기능 연동 
 - 무한 스크롤 : ScrollNotification을 통한 스크롤 감지 및 무한 스크롤 기능 연동
-- FireStore 연동 및 데이터 관리 : Cloud FireStore 연동 및 
+- FireStore 연동 및 데이터 관리 : Cloud FireStore 및 데이터 관리 연동
 
 ## 기술
 - Flutter(And, IOS), Bloc(상태관리), Cloud FireStore(서비리스)  
@@ -19,16 +19,17 @@
   freezed_annotation: ^2.4.4
   flutter_bloc: ^8.1.6
 ```
+
 ## 폴더구조 및 설명
 
 ``` bash
 lib/
 ├── core/ : 핵심 유틸과 설정 파일
 │   ├── firebase_config.dart : Firebase 초기화 및 설정
-│   ├── constants/ 
+│   ├── constants/ 변하지 않는 상수 
 │   │   ├── enum/ 
 │   │   │   └── user_role_enum.dart : 작성 모드 enum
-│   │   └── app_routes.dart : 앱 라우트
+│   │   └── app_routes.dart : 앱 라우트 
 │   └── utils/ : 유틸 
 │       ├── app_router.dart : 앱 라우터 정리 
 │       ├── document_snapshot_converter.dart : 파이어베이스 DocumentSnpahsot 타입 변환
@@ -50,22 +51,22 @@ lib/
 │   │   └── presentation/ : 화면 
 │   │       └── user_details_screen.dart
 │   ├── user_insert/ : 사용자 등록 페이지 관련 로직 및 UI
-│   │   ├── cubit/
+│   │   ├── cubit/ : 상태 관리 및 비즈니스 로직
 │   │   │   ├── user_insert_cubit.dart
 │   │   │   └── user_insert_state.dart
-│   │   ├── data/
-│   │   │   └── repositories/
-│   │   │       └── user_insert_repository.dart
+│   │   ├── data/ : 데이터 모델 및 레포지토리 정의
+│   │   │   └── repositories/ : Firebase 데이터 통신에 필요한 비즈니스 로직
+│   │   │       └── user_insert_repository.dart 
 │   │   └── presentation/ : 화면
 │   │       └── user_insert_screen.dart
 │   └── user_list/ : 사용자 리스트 페이지 관련 로직 및 UI
 │       ├── cubit/ : 상태 관리 및 비즈니스 로직
 │       │   ├── user_list_cubit.dart
 │       │   └── user_list_state.dart
-│       ├── data/
+│       ├── data/ : 데이터 모델 및 레포지토리 정의
 │       │   ├── models/
-│       │   │   └── user_model.dart
-│       │   └── repositories/
+│       │   │   └── user_model.dart : 유저 모델 정의
+│       │   └── repositories/ : Firebase 데이터 통신에 필요한 비즈니스 로직
 │       │       └── user_repository.dart
 │       └── presentation/ : 화면
 │           └── user_list_screen.dart
