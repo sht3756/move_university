@@ -1,5 +1,5 @@
 # move_university_project
-
+```
 lib/
 ├── core/ : 핵심 유틸과 설정 파일
 │   ├── firebase_config.dart : Firebase 초기화 및 설정
@@ -49,4 +49,5 @@ lib/
 │   │   └── user_card.dart : 유저 카드 
 │   └── styles/
 │       └── app_theme.dart
-├── main.dart : 앱 진입점 
+├── main.dart : 앱 진입점
+```
