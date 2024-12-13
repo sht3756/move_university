@@ -11,6 +11,8 @@ class UserCard extends StatelessWidget {
   final UserCardMode mode;
   final bool showEmailError;
   final bool showPhoneError;
+  final bool showNameError;
+
   final void Function(String)? onPhoneChanged;
   final void Function()? onEditPressed;
 
@@ -22,6 +24,7 @@ class UserCard extends StatelessWidget {
     required this.mode,
     this.showEmailError = false,
     this.showPhoneError = false,
+    this.showNameError = false,
     this.onPhoneChanged,
     this.onEditPressed,
   });
@@ -46,6 +49,7 @@ class UserCard extends StatelessWidget {
               label: '사용자 이름',
               prefixIcon: Icons.person_sharp,
               keyboardType: TextInputType.name,
+              errorText: showNameError ? '2글자 이상으로 해주세요' : null,
               enabled: isEditable,
             ),
             const SizedBox(height: 10),

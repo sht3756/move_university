@@ -21,6 +21,7 @@ class _UserInsertScreenState extends State<UserInsertScreen> {
 
   bool showEmailError = false;
   bool showPhoneError = false;
+  bool showNameError = false;
 
   @override
   void initState() {
@@ -38,6 +39,14 @@ class _UserInsertScreenState extends State<UserInsertScreen> {
         controller: phoneController,
         isValid: isPhoneValid,
         setError: (value) => showPhoneError = value,
+      );
+    });
+
+    nameController.addListener(() {
+      _updateErrorState(
+        controller: nameController,
+        isValid: isNameValid,
+        setError: (value) => showNameError = value,
       );
     });
   }
@@ -115,6 +124,7 @@ class _UserInsertScreenState extends State<UserInsertScreen> {
             mode: UserCardMode.create,
             showEmailError: showEmailError,
             showPhoneError: showPhoneError,
+            showNameError: showNameError,
             onPhoneChanged: (value) {
               final formatted = formatPhoneNumber(value);
               phoneController.value = TextEditingValue(

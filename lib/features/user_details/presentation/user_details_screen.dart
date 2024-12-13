@@ -30,6 +30,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
 
   bool showEmailError = false;
   bool showPhoneError = false;
+  bool showNameError = false;
 
   @override
   void initState() {
@@ -54,6 +55,14 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
         controller: phoneController,
         isValid: isPhoneValid,
         setError: (value) => showPhoneError = value,
+      );
+    });
+
+    nameController.addListener(() {
+      _updateErrorState(
+        controller: nameController,
+        isValid: isNameValid,
+        setError: (value) => showNameError = value,
       );
     });
   }
@@ -200,6 +209,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
       mode: UserCardMode.edit,
       showEmailError: showEmailError,
       showPhoneError: showPhoneError,
+      showNameError: showNameError,
       onPhoneChanged: (value) {
         final formatted = value.replaceAllMapped(
             RegExp(r'(\d{3})(\d{4})(\d{4})'), (m) => '${m[1]}-${m[2]}-${m[3]}');
