@@ -1,25 +1,35 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:move_university_project/features/user_details/cubit/user_details_cubit.dart';
-import 'package:move_university_project/features/user_details/data/repositories/user_details_repository.dart';
-import 'package:move_university_project/features/user_insert/cubit/user_insert_cubit.dart';
-import 'package:move_university_project/features/user_insert/data/repositories/user_insert_repository.dart';
-import 'package:move_university_project/features/user_insert/presentation/user_insert_screen.dart';
-import 'package:move_university_project/features/user_list/cubit/user_list_cubit.dart';
-import 'package:move_university_project/features/user_list/data/repositories/user_repository.dart';
-import 'package:move_university_project/features/user_list/presentation/user_list_screen.dart';
+import 'package:move_university_project/core/utils/main_wrapper.dart';
 
 import 'core/utils/app_router.dart';
 import 'firebase_config.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
-  await Firebase.initializeApp(options: FirebaseConfig.options);
-  runApp(const MyApp());
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    FlutterError.onError = (FlutterErrorDetails details) {
+      log('플러터 내부 에러', error: details.exception, stackTrace: details.stack);
+      if (kDebugMode) {
+        FlutterError.presentError(details);
+      } else {
+        log('프로덕션 환경 에러 발생: ${details.exception}');
+      }
+    };
+
+    await dotenv.load();
+    await Firebase.initializeApp(options: FirebaseConfig.options);
+
+    runApp(const MyApp());
+  }, (Object error, StackTrace stackTrace) {
+    log('플러터 외부 에러', error: error, stackTrace: stackTrace);
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -27,36 +37,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (_) => UserListCubit(
-                UserRepository(FirebaseFirestore.instance),
-              )..fetchUsers(),
-            ),
-            BlocProvider(
-              create: (_) => UserInsertCubit(
-                UserInsertRepository(FirebaseFirestore.instance),
-              ),
-            ),
-            BlocProvider(
-              create: (_) => UserDetailsCubit(
-                UserDetailsRepository(FirebaseFirestore.instance),
-              ),
-            ),
-          ],
-          child: const UserListScreen(),
-        ),
-        BlocProvider(
-          create: (_) => UserInsertCubit(
-            UserInsertRepository(FirebaseFirestore.instance),
-          ),
-          child: const UserInsertScreen(),
-        ),
-      ],
-      child: const MaterialApp(
+    return const MainWrapper(
+      child: MaterialApp(
         title: '관리자 앱',
         initialRoute: '/',
         onGenerateRoute: AppRouter.generateRoute, // 동적 라우팅 사용
