@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_university_project/core/constants/enum/enum.dart';
 import 'package:move_university_project/core/utils/format_phone_number.dart';
+import 'package:move_university_project/core/utils/valid_utils.dart';
 import 'package:move_university_project/features/user_details/data/models/user_details_model.dart';
 import 'package:move_university_project/features/user_insert/cubit/user_insert_cubit.dart';
 import 'package:move_university_project/shared/widgets/user_card.dart';
@@ -27,7 +28,7 @@ class _UserInsertScreenState extends State<UserInsertScreen> {
     emailController.addListener(() {
       _updateErrorState(
         controller: emailController,
-        isValid: _isEmailValid,
+        isValid: isEmailValid,
         setError: (value) => showEmailError = value,
       );
     });
@@ -35,7 +36,7 @@ class _UserInsertScreenState extends State<UserInsertScreen> {
     phoneController.addListener(() {
       _updateErrorState(
         controller: phoneController,
-        isValid: _isPhoneValid,
+        isValid: isPhoneValid,
         setError: (value) => showPhoneError = value,
       );
     });
@@ -49,38 +50,22 @@ class _UserInsertScreenState extends State<UserInsertScreen> {
     super.dispose();
   }
 
-  bool _isNameValid(String name) => name.isNotEmpty && name.length >= 2;
-
-  bool _isEmailValid(String email) {
-    final emailRegex =
-    RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    return emailRegex.hasMatch(email);
-  }
-
-  bool _isPhoneValid(String phone) {
-    final phoneRegex = RegExp(r'^010-\d{4}-\d{4}$');
-    return phoneRegex.hasMatch(phone);
-  }
-
-  bool _isFormValid() {
-    print(_isPhoneValid(phoneController.text));
-    return _isNameValid(nameController.text) &&
-        _isEmailValid(emailController.text) &&
-        _isPhoneValid(phoneController.text);
-  }
-
   void _updateErrorState({
     required TextEditingController controller,
     required bool Function(String) isValid,
     required void Function(bool) setError,
   }) {
-    setState(() {
-      setError(controller.text.isNotEmpty && !isValid(controller.text));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          setError(controller.text.isNotEmpty && !isValid(controller.text));
+        });
+      }
     });
   }
 
   void _submitForm() {
-    if (_isFormValid()) {
+    if (isFormValid(nameController.text, emailController.text, phoneController.text)) {
       context.read<UserInsertCubit>().insertUserDetails(
         UserDetailsModel(
           name: nameController.text.trim(),
@@ -117,7 +102,7 @@ class _UserInsertScreenState extends State<UserInsertScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: _isFormValid() ? _submitForm : null,
+                onPressed: isFormValid(nameController.text, emailController.text, phoneController.text) ? _submitForm : null,
                 child: const Text('완료'),
               ),
             ],
@@ -136,7 +121,7 @@ class _UserInsertScreenState extends State<UserInsertScreen> {
                 selection: TextSelection.collapsed(offset: formatted.length),
               );
               setState(() {
-                showPhoneError = value.isNotEmpty && !_isPhoneValid(formatted);
+                showPhoneError = value.isNotEmpty && !isPhoneValid(formatted);
               });
             },
           ),

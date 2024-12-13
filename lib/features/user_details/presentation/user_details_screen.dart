@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_university_project/core/constants/enum/enum.dart';
+import 'package:move_university_project/core/utils/valid_utils.dart';
 import 'package:move_university_project/features/user_details/cubit/user_details_cubit.dart';
 import 'package:move_university_project/features/user_details/cubit/user_details_state.dart';
 import 'package:move_university_project/features/user_details/data/repositories/user_details_repository.dart';
@@ -22,9 +23,9 @@ class UserDetailsScreen extends StatefulWidget {
 
 class _UserDetailsScreenState extends State<UserDetailsScreen> {
   UserCardMode currentMode = UserCardMode.view;
-  late TextEditingController nameController;
-  late TextEditingController phoneController;
-  late TextEditingController emailController;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   late DateTime registerDate;
 
   bool showEmailError = false;
@@ -33,15 +34,17 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController();
-    phoneController = TextEditingController();
-    emailController = TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = widget.user;
+      nameController.text = user.name;
+      phoneController.text = user.phone;
+      emailController.text = user.email;
+    });
 
-    // 에러 상태 리스너
     emailController.addListener(() {
       _updateErrorState(
         controller: emailController,
-        isValid: _isEmailValid,
+        isValid: isEmailValid,
         setError: (value) => showEmailError = value,
       );
     });
@@ -49,17 +52,9 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
     phoneController.addListener(() {
       _updateErrorState(
         controller: phoneController,
-        isValid: _isPhoneValid,
+        isValid: isPhoneValid,
         setError: (value) => showPhoneError = value,
       );
-    });
-
-    // 초기값 설정
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = widget.user;
-      nameController.text = user.name;
-      phoneController.text = user.phone;
-      emailController.text = user.email;
     });
   }
 
@@ -76,42 +71,23 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
     required bool Function(String) isValid,
     required void Function(bool) setError,
   }) {
-    setState(() {
-      setError(controller.text.isNotEmpty && !isValid(controller.text));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          setError(controller.text.isNotEmpty && !isValid(controller.text));
+        });
+      }
     });
-  }
-
-  bool _isNameValid(String name) => name.isNotEmpty && name.length >= 2;
-
-  bool _isEmailValid(String email) {
-    final emailRegex =
-        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    return emailRegex.hasMatch(email);
-  }
-
-  bool _isPhoneValid(String phone) {
-    final phoneRegex = RegExp(r'^010-\d{4}-\d{4}$');
-    return phoneRegex.hasMatch(phone);
-  }
-
-  bool _isFormValid() {
-    return _isNameValid(nameController.text) &&
-        _isEmailValid(emailController.text) &&
-        _isPhoneValid(phoneController.text);
   }
 
   @override
   Widget build(BuildContext context) {
     final userData = widget.user;
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => UserDetailsCubit(
-              UserDetailsRepository(FirebaseFirestore.instance))
-            ..fetchUserDetails(userName: userData.email),
-        ),
-      ],
+    return BlocProvider(
+      create: (context) => UserDetailsCubit(
+          UserDetailsRepository(FirebaseFirestore.instance))
+        ..fetchUserDetails(userName: userData.email),
       child: BlocConsumer<UserDetailsCubit, UserDetailsState>(
         listener: (BuildContext context, UserDetailsState state) {
           state.whenOrNull(error: (e, s) {
@@ -134,7 +110,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                           });
                         }
                       : () {
-                          if (_isFormValid()) {
+                          if (isFormValid(nameController.text, emailController.text, phoneController.text)) {
                             final updateData = UserDetailsModel(
                               name: nameController.text,
                               email: emailController.text,
