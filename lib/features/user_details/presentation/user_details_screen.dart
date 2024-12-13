@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_university_project/core/constants/enum/enum.dart';
+import 'package:move_university_project/core/utils/format_time.dart';
 import 'package:move_university_project/core/utils/valid_utils.dart';
 import 'package:move_university_project/features/user_details/cubit/user_details_cubit.dart';
 import 'package:move_university_project/features/user_details/cubit/user_details_state.dart';
@@ -27,6 +28,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   late DateTime registerDate;
+  late DateTime modifiedDate;
 
   bool showEmailError = false;
   bool showPhoneError = false;
@@ -94,9 +96,9 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
     final userData = widget.user;
 
     return BlocProvider(
-      create: (context) => UserDetailsCubit(
-          UserDetailsRepository(FirebaseFirestore.instance))
-        ..fetchUserDetails(userName: userData.email),
+      create: (context) =>
+          UserDetailsCubit(UserDetailsRepository(FirebaseFirestore.instance))
+            ..fetchUserDetails(userName: userData.email),
       child: BlocConsumer<UserDetailsCubit, UserDetailsState>(
         listener: (BuildContext context, UserDetailsState state) {
           state.whenOrNull(error: (e, s) {
@@ -119,7 +121,8 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                           });
                         }
                       : () {
-                          if (isFormValid(nameController.text, emailController.text, phoneController.text)) {
+                          if (isFormValid(nameController.text,
+                              emailController.text, phoneController.text)) {
                             final updateData = UserDetailsModel(
                               name: nameController.text,
                               email: emailController.text,
@@ -168,6 +171,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               success: (UserDetailsModel data) {
                 registerDate = data.registerDate;
+                modifiedDate = data.modifiedDate;
 
                 if (currentMode == UserCardMode.view) {
                   nameController.text = data.name;
@@ -188,16 +192,39 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   }
 
   Widget _buildViewMode(UserDetailsModel data) {
-    return UserCard(
-      nameController: nameController,
-      emailController: emailController,
-      phoneController: phoneController,
-      mode: UserCardMode.view,
-      onEditPressed: () {
-        setState(() {
-          currentMode = UserCardMode.edit;
-        });
-      },
+    return Column(
+      children: [
+        UserCard(
+          nameController: nameController,
+          emailController: emailController,
+          phoneController: phoneController,
+          mode: UserCardMode.view,
+          onEditPressed: () {
+            setState(() {
+              currentMode = UserCardMode.edit;
+            });
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const Text('작성시간 : '),
+                  Text(formatDateTime(registerDate.toIso8601String())),
+                ],
+              ),
+              Row(
+                children: [
+                  const Text('수정시간 : '),
+                  Text(formatDateTime(modifiedDate.toIso8601String())),
+                ],
+              ),
+            ],
+          ),
+        )
+      ],
     );
   }
 

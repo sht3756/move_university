@@ -19,7 +19,7 @@ flutter run
 ```bash
 flutter pub get
 flutter pub run build_runner build
-flutter run —release
+flutter run --release
 ```
 
 ## 주요 기능 설명 
@@ -40,6 +40,7 @@ flutter run —release
   flutter_dotenv: ^5.2.1
   freezed_annotation: ^2.4.4
   flutter_bloc: ^8.1.6
+  intl: ^0.20.1
 ```
 
 ## 폴더구조 및 설명
@@ -55,7 +56,8 @@ lib/
 │   └── utils/ : 유틸 
 │       ├── app_router.dart : 앱 라우터 정리 
 │       ├── document_snapshot_converter.dart : 파이어베이스 DocumentSnpahsot 타입 변환
-│       ├── format_phone_number.dart : 핸드폰 - 포멧 
+│       ├── format_phone_number.dart : 핸드폰 - 포멧
+│       ├── format_time.dart : 시간 - 포멧 
 │       ├── main_wrapper.dart : 메인 의존성 파일 분리
 │       ├── stack_trace_converter.dart : Error, StackTrace 변환
 │       ├── time_stamp_converter.dart : 파이어베이스 Timestamp 타입 변환
