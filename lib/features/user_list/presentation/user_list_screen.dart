@@ -60,7 +60,7 @@ class _UserListScreenState extends State<UserListScreen> {
             )
           ] else ...[
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: const Icon(Icons.check_box_outlined),
               onPressed: toggleEditMode,
             ),
             IconButton(
@@ -150,13 +150,18 @@ class _UserListScreenState extends State<UserListScreen> {
                   ),
             title: Text(user.name),
             subtitle: Text(user.phone),
-            onTap: isEditing ? null : () async {
-              final result = await Navigator.pushNamed(context, '/userDetails',
-                  arguments: user);
-              if (result == true) {
-                context.read<UserListCubit>().fetchUsers();
-              }
-            },
+            onTap: isEditing
+                ? null
+                : () async {
+                    final result = await Navigator.pushNamed(
+                      context,
+                      '/userDetails',
+                      arguments: user,
+                    );
+                    if (result == true) {
+                      context.read<UserListCubit>().fetchUsers();
+                    }
+                  },
             trailing: isEditing
                 ? null
                 : const Icon(Icons.arrow_forward_ios_rounded, size: 12),
