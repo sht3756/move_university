@@ -7,30 +7,22 @@ git clone https://github.com/sht3756/move_university.git
 ```
 - .env파일에 API 중요 문서 복사후 붙여넣기
 
-- debug mode 실행
+- 프로젝트 실행
 ```bash
 flutter pub get
 flutter pub run build_runner build
 flutter run 
-
-```
-
-- release mode 실행
-```bash
-flutter pub get
-flutter pub run build_runner build
-flutter run --release
 ```
 
 ## 주요 기능 설명 
 - 사용자 목록 조회 : NotificationListener 를 통해 무한 스크롤 기능 연동
-- 사용자 상세보기, 수정 및 삭제 : 작성 모드를 통해 수정 모드 및 삭제 기능 연동
+- 사용자 상세, 수정 및 삭제 : 작성 모드를 통해 수정 모드 및 삭제 기능 연동
 - 사용자 추가 : 바텀 모달 시트를 통해 사용자 추가 기능 연동 
-- 무한 스크롤 : ScrollNotification을 통한 스크롤 감지 및 무한 스크롤 기능 연동
+- 무한 스크롤 : ScrollNotification 을 통한 스크롤 감지 및 무한 스크롤 기능 연동
 - FireStore 연동 및 데이터 관리 : Cloud FireStore 및 데이터 관리 연동
 
 ## 기술
-- Flutter(And, IOS), Bloc(상태관리), Cloud FireStore(서비리스)  
+- Flutter(And, IOS), Bloc(상태관리), Cloud FireStore(서버)  
 
 ## 패키지
 ```bash
