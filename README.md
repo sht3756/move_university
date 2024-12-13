@@ -1,5 +1,27 @@
 # 이사대학 [신희태] 과제
 
+## 설치 및 실행 방법
+- 프로젝트 클론
+```bash
+git clone https://github.com/sht3756/move_university.git
+```
+- .env파일에 API 중요 문서 복사후 붙여넣기
+
+- debug mode 실행
+```bash
+flutter pub get
+flutter pub run build_runner build
+flutter run 
+
+```
+
+- release mode 실행
+```bash
+flutter pub get
+flutter pub run build_runner build
+flutter run —release
+```
+
 ## 주요 기능 설명 
 - 사용자 목록 조회 : NotificationListener 를 통해 무한 스크롤 기능 연동
 - 사용자 상세보기, 수정 및 삭제 : 작성 모드를 통해 수정 모드 및 삭제 기능 연동
@@ -105,23 +127,3 @@ lib/
 | 상세 - 삭제 | <img src="https://github.com/user-attachments/assets/f1b50dd8-6add-455a-b074-77beb655075e" width="300" /> |
 | 추가 | <img src="https://github.com/user-attachments/assets/1f2bf86b-c0da-4bfe-9732-d6b254394b0b" width="300" /> |
 
-## 설치 및 실행 방법
-- 프로젝트 클론
-- .env파일에 API 중요 문서 복사후 붙여넣기
-
-- debug mode 실행
-```bash
-flutter pub get
-flutter pub run build_runner build
-flutter run 
-
-```
-
-- release mode 실행
-```bash
-flutter pub get
-flutter pub run build_runner build
-flutter run —release
-```
-
- 
