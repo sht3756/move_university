@@ -96,6 +96,7 @@ class _UserInsertScreenState extends State<UserInsertScreen> {
             elevation: 1,
             backgroundColor: Colors.grey[200],
             title: const Text('사용자 추가'),
+            centerTitle: true,
             leading: TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('취소'),
